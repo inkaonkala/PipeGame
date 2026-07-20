@@ -15,6 +15,9 @@ var grid_pos: Vector2i
 
 const CELL_SIZE = 32
 
+func _ready() -> void:
+	sprite.position = Vector2(CELL_SIZE / 2.0, CELL_SIZE / 2.0)
+	
 func setup(type: PipeType, pos: Vector2i) -> void:
 	pipe_type = type
 	grid_pos = pos
@@ -39,5 +42,5 @@ func update_sprite() -> void:
 			
 
 func rotate_pipe() -> void:
-	rotation_degrees += 90
+	sprite.rotation_degrees += 90
 	

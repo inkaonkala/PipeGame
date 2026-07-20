@@ -6,6 +6,11 @@ const CELL_SIZE := 32
 @export var pipe_tiles: PackedScene
 @export var enemy_scene: PackedScene
 
+@onready var straight_button = $"../CanvasLayer/HBoxContainer/Straight"
+@onready var corner_button = $"../CanvasLayer/HBoxContainer/Corner"
+@onready var tee_button = $"../CanvasLayer/HBoxContainer/Tee"
+@onready var cross_button = $"../CanvasLayer/HBoxContainer/Cross"
+
 var start_pos: Vector2i
 var end_pos: Vector2i
 var obsta: Array[Vector2i] = []
@@ -29,7 +34,8 @@ func _ready() -> void:
 	check_what_pipe()
 	add_extra_pipes()
 	
-	print("Player pipes: ", pipe_inventory)
+	update_pipe_ui()
+	#print("Player pipes: ", pipe_inventory)
 	queue_redraw()
 	
 #	spawn_test_pipe()
@@ -84,6 +90,20 @@ func gene_obs(amount: int) -> void:
 		if random_pos in obsta:
 			continue
 		obsta.append(random_pos)
+
+
+#PIPE STUFF!
+
+func update_pipe_ui() -> void:
+	straight_button.text = "x" + str(pipe_inventory["straight"])
+	corner_button.text = "x" + str(pipe_inventory["corner"])
+	tee_button.text = "x" + str(pipe_inventory["tee"])
+	cross_button.text = "x" + str(pipe_inventory["cross"])
+	
+	straight_button.disabled = pipe_inventory["straight"] <= 0
+	corner_button.disabled = pipe_inventory["corner"] <= 0
+	tee_button.disabled = pipe_inventory["tee"] <= 0
+	cross_button.disabled = pipe_inventory["cross"] <= 0
 		
 func check_what_pipe() -> void:
 	#NULL THE INVI BEFORE NEW COUNT!
@@ -129,12 +149,6 @@ func add_extra_pipes() -> void:
 	if randf() < 0.2:
 		pipe_inventory["cross"] += 1
 
-func place_enemies() -> void:
-	for obsta_pos in obsta:
-		var enemy = enemy_scene.instantiate()
-		add_child(enemy)
-		enemy.setup_enemies(obsta_pos)
-		
 func _draw() -> void:
 	#DRAW GRID
 	for x in range(GRID_SIZE.x):
@@ -179,19 +193,6 @@ func _draw() -> void:
 #			true
 #			)
 
-#INPUT!
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			var local_mouse := to_local(event.position)
-
-			var grid_pos := Vector2i(
-				int(local_mouse.x / CELL_SIZE),
-				int(local_mouse.y / CELL_SIZE)
-			)
-
-			try_place_pipe(grid_pos)
-
 func try_place_pipe(grid_pos: Vector2i) -> void:
 	print("CLICK: ", grid_pos)
 	if not is_inside_grid(grid_pos):
@@ -201,7 +202,8 @@ func try_place_pipe(grid_pos: Vector2i) -> void:
 	if grid_pos == start_pos or grid_pos == end_pos:
 		return
 	if placed_pipes.has(grid_pos):
-		print("Occupied!!")
+		var pipe = placed_pipes[grid_pos]
+		pipe.rotate_pipe()
 		return
 	
 	if pipe_inventory[selected_pipe_type] <= 0:
@@ -243,6 +245,7 @@ func place_pipe(type_name: String, grid_pos: Vector2i) -> void:
 	placed_pipes[grid_pos] = pipe
 	pipe_inventory[type_name] -= 1
 
+	update_pipe_ui()
 #	print("Placed ", type_name, " at ", grid_pos)
 #	print("Remaining pipes: ", pipe_inventory)
 		
@@ -257,6 +260,26 @@ func spawn_test_pipe() -> void:
 		Vector2i(3, 3)
 	)
 
+#ENEMIES
+func place_enemies() -> void:
+	for obsta_pos in obsta:
+		var enemy = enemy_scene.instantiate()
+		add_child(enemy)
+		enemy.setup_enemies(obsta_pos)
+	
+	
+#INPUT!
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			var local_mouse := to_local(event.position)
+
+			var grid_pos := Vector2i(
+				int(local_mouse.x / CELL_SIZE),
+				int(local_mouse.y / CELL_SIZE)
+			)
+
+			try_place_pipe(grid_pos)
 
 
 func _on_straight_pressed() -> void:
