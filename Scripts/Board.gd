@@ -1,0 +1,272 @@
+extends Node2D
+
+const GRID_SIZE := Vector2i(8, 8)
+const CELL_SIZE := 32
+
+@export var pipe_tiles: PackedScene
+@export var enemy_scene: PackedScene
+
+var start_pos: Vector2i
+var end_pos: Vector2i
+var obsta: Array[Vector2i] = []
+var solution_path: Array[Vector2i] = []
+
+var selected_pipe_type := "straight"
+var placed_pipes := {}
+
+var pipe_inventory := {
+	"straight": 0,
+	"corner": 0,
+	"tee": 0,
+	"cross": 0
+}
+
+func _ready() -> void:
+	generate_start_and_end()
+	gene_solutionpath()
+	gene_obs(8)
+	place_enemies()
+	check_what_pipe()
+	add_extra_pipes()
+	
+	print("Player pipes: ", pipe_inventory)
+	queue_redraw()
+	
+#	spawn_test_pipe()
+
+func generate_start_and_end() -> void:
+	start_pos = Vector2i(
+		0,
+		randi_range(0, GRID_SIZE.y -1)
+	)
+	end_pos = Vector2i(
+		GRID_SIZE.x - 1,
+		randi_range(0, GRID_SIZE.y - 1)
+	)
+	
+	print("Start: ", start_pos)
+	print("End: ", end_pos)
+
+func gene_solutionpath() -> void:
+	var current_pos := start_pos
+	
+	solution_path.append(current_pos)
+	
+	while current_pos != end_pos:
+		var possible_moves: Array[Vector2i] = []
+		#first mo e right
+		if current_pos.x < end_pos.x:
+				possible_moves.append(Vector2i.RIGHT)
+		
+		#the move verticalle towadrs the end
+		if current_pos.y < end_pos.y:
+			possible_moves.append(Vector2i.DOWN)
+		elif current_pos.y > end_pos.y:
+			possible_moves.append(Vector2i.UP)
+			
+		var move: Vector2i = possible_moves.pick_random()
+		current_pos += move
+		
+		solution_path.append(current_pos)
+		
+#		print("Solution path: ", solution_path)	
+
+func gene_obs(amount: int) -> void:
+	obsta.clear()
+	
+	while obsta.size() < amount:
+		var random_pos := Vector2i(
+			randi_range(0, GRID_SIZE.x - 1),
+			randi_range(0, GRID_SIZE.y - 1)
+		)
+		if random_pos in solution_path:
+			continue
+		if random_pos in obsta:
+			continue
+		obsta.append(random_pos)
+		
+func check_what_pipe() -> void:
+	#NULL THE INVI BEFORE NEW COUNT!
+	pipe_inventory = {
+		"straight": 0,
+		"corner": 0,
+		"tee": 0,
+		"cross": 0
+	}
+	for i in range(1, solution_path.size() - 1):
+		var previous := solution_path[i - 1]
+		var current := solution_path[i]
+		var next := solution_path[i + 1]
+
+		var dir_in := previous - current
+		var dir_out := next - current
+
+		var directions := [dir_in, dir_out]
+
+		if (
+			Vector2i.LEFT in directions
+			and Vector2i.RIGHT in directions
+		):
+			pipe_inventory["straight"] += 1
+
+		elif (
+			Vector2i.UP in directions
+			and Vector2i.DOWN in directions
+		):
+			pipe_inventory["straight"] += 1
+
+		else:
+			pipe_inventory["corner"] += 1
+
+func add_extra_pipes() -> void:
+	pipe_inventory["straight"] += randi_range(1, 3)
+	pipe_inventory["corner"] += randi_range(1, 3)
+	
+	
+	if randf() < 0.5:
+		pipe_inventory["tee"] += 1
+
+	if randf() < 0.2:
+		pipe_inventory["cross"] += 1
+
+func place_enemies() -> void:
+	for obsta_pos in obsta:
+		var enemy = enemy_scene.instantiate()
+		add_child(enemy)
+		enemy.setup_enemies(obsta_pos)
+		
+func _draw() -> void:
+	#DRAW GRID
+	for x in range(GRID_SIZE.x):
+		for y in range(GRID_SIZE.y):
+			var cell_pos := Vector2(
+				x * CELL_SIZE,
+				y * CELL_SIZE
+			)
+			
+			draw_rect(
+				Rect2(cell_pos, Vector2(CELL_SIZE, CELL_SIZE)),
+				Color.WHITE,
+				false,
+				
+			)
+	#DRAW SOLUTION
+	for cell in solution_path:
+		var cell_pos := Vector2(
+			cell.x * CELL_SIZE,
+			cell.y * CELL_SIZE
+		)
+		
+		draw_rect(
+			Rect2(cell_pos, Vector2(CELL_SIZE, CELL_SIZE)),
+			Color(0.348, 0.746, 0.739, 1.0),
+			true
+		)
+	#DRAW OBSTACLES
+#	@warning_ignore("shadowed_variable")
+#	for obsta in obsta:
+#		var obs_pos := Vector2(
+#			obsta.x * CELL_SIZE,
+#			obsta.y * CELL_SIZE
+#		)
+#		
+#		draw_rect(
+#			Rect2(
+#				obs_pos,
+#				Vector2(CELL_SIZE, CELL_SIZE)
+#			),
+#			Color.DARK_GREEN,
+#			true
+#			)
+
+#INPUT!
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			var local_mouse := to_local(event.position)
+
+			var grid_pos := Vector2i(
+				int(local_mouse.x / CELL_SIZE),
+				int(local_mouse.y / CELL_SIZE)
+			)
+
+			try_place_pipe(grid_pos)
+
+func try_place_pipe(grid_pos: Vector2i) -> void:
+	print("CLICK: ", grid_pos)
+	if not is_inside_grid(grid_pos):
+		return
+	if grid_pos in obsta:
+		return
+	if grid_pos == start_pos or grid_pos == end_pos:
+		return
+	if placed_pipes.has(grid_pos):
+		print("Occupied!!")
+		return
+	
+	if pipe_inventory[selected_pipe_type] <= 0:
+		print("No ", selected_pipe_type, " pipes left!")
+		return
+	place_pipe(selected_pipe_type, grid_pos)
+		
+#HELPER FOR PIPE_PLACEMENT
+func is_inside_grid(grid_pos: Vector2i) -> bool:
+	return (
+		grid_pos.x >= 0
+		and grid_pos.x < GRID_SIZE.x
+		and grid_pos.y >= 0
+		and grid_pos.y < GRID_SIZE.y
+	)
+	
+func select_pipe(type_name: String) -> void:
+	selected_pipe_type = type_name
+	print("Selected pipe: ", selected_pipe_type)
+	
+
+func place_pipe(type_name: String, grid_pos: Vector2i) -> void:
+	var pipe = pipe_tiles.instantiate()
+	add_child(pipe)
+
+	match type_name:
+		"straight":
+			pipe.setup(pipe.PipeType.STRAIGHT, grid_pos)
+			
+		"corner":
+			pipe.setup(pipe.PipeType.CORNER, grid_pos)
+
+		"tee":
+			pipe.setup(pipe.PipeType.TEE, grid_pos)
+
+		"cross":
+			pipe.setup(pipe.PipeType.CROSS, grid_pos)
+
+	placed_pipes[grid_pos] = pipe
+	pipe_inventory[type_name] -= 1
+
+#	print("Placed ", type_name, " at ", grid_pos)
+#	print("Remaining pipes: ", pipe_inventory)
+		
+#WE DONT NEED THIS ANYMORE!
+func spawn_test_pipe() -> void:
+	var pipe = pipe_tiles.instantiate()
+
+	add_child(pipe)
+
+	pipe.setup(
+		pipe.PipeType.STRAIGHT,
+		Vector2i(3, 3)
+	)
+
+
+
+func _on_straight_pressed() -> void:
+	select_pipe("straight")
+
+func _on_corner_pressed() -> void:
+	select_pipe("corner")
+	
+func _on_tee_pressed() -> void:
+	select_pipe("tee")
+
+func _on_cross_pressed() -> void:
+	select_pipe("cross")
