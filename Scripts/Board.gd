@@ -271,16 +271,48 @@ func try_remove_pipe(grid_pos: Vector2i) -> void:
 	pipe.queue_free()
 	update_pipe_ui()
 	
-#WE DONT NEED THIS ANYMORE!
-func spawn_test_pipe() -> void:
-	var pipe = pipe_tiles.instantiate()
+#WATERFLOW
 
-	add_child(pipe)
+func check_water_path() -> bool:
+	var visited: Array[Vector2i] = []
+	var to_check: Array[Vector2i] = [start_pos]
 
-	pipe.setup(
-		pipe.PipeType.STRAIGHT,
-		Vector2i(3, 3)
-	)
+	while not to_check.is_empty():
+		var current: Vector2i = to_check.pop_front()
+		
+		if current in visited:
+			continue
+		visited.append(current)
+		if current == end_pos:
+			print("Water reached the end!")
+			return true
+		
+		for dir in get_cell_directions(current):
+			var next_pos := current + dir
+			
+			if can_flow(current, next_pos, dir):
+				to_check.append(next_pos)
+	print("WATER IS LEAKING!!")
+	return false
+				
+func get_cell_directions(grid_pos: Vector2i) -> Array[Vector2i]:
+	if grid_pos == start_pos:
+		return[Vector2i.RIGHT]
+	if placed_pipes.has(grid_pos):
+		return placed_pipes[grid_pos].get_connections()
+	
+	return[]
+		
+func can_flow(current_pos: Vector2i, next_pos: Vector2i, dir: Vector2i) -> bool:
+	if next_pos == end_pos:
+		return true
+	if not placed_pipes.has(next_pos):
+		return false
+	
+	var next_pipe = placed_pipes[next_pos]
+	var opposite_dir := -dir
+	
+	return opposite_dir in next_pipe.get_connections()
 
 #ENEMIES
 func place_enemies() -> void:
@@ -317,3 +349,9 @@ func _on_tee_pressed() -> void:
 
 func _on_cross_pressed() -> void:
 	select_pipe("cross")
+
+
+#TEMP TEST!!
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_accept"):
+		check_water_path()

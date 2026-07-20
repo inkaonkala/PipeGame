@@ -58,8 +58,8 @@ func get_connections() -> Array[Vector2i]:
 
 		PipeType.CORNER:
 			connections = [
-				Vector2i.RIGHT,
-				Vector2i.DOWN
+				Vector2i.UP,
+				Vector2i.RIGHT
 			]
 
 		PipeType.TEE:
