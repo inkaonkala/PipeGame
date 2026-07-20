@@ -5,6 +5,7 @@ const CELL_SIZE := 32
 
 @export var pipe_tiles: PackedScene
 @export var enemy_scene: PackedScene
+@export var start_end: PackedScene
 
 @onready var straight_button = $"../CanvasLayer/HBoxContainer/Straight"
 @onready var corner_button = $"../CanvasLayer/HBoxContainer/Corner"
@@ -15,6 +16,9 @@ var start_pos: Vector2i
 var end_pos: Vector2i
 var obsta: Array[Vector2i] = []
 var solution_path: Array[Vector2i] = []
+
+var start_tile
+var end_tile
 
 var selected_pipe_type := "straight"
 var placed_pipes := {}
@@ -30,6 +34,8 @@ func _ready() -> void:
 	generate_start_and_end()
 	gene_solutionpath()
 	gene_obs(8)
+	
+	place_start_and_end()
 	place_enemies()
 	check_what_pipe()
 	add_extra_pipes()
@@ -270,6 +276,36 @@ func try_remove_pipe(grid_pos: Vector2i) -> void:
 	placed_pipes.erase(grid_pos)
 	pipe.queue_free()
 	update_pipe_ui()
+
+#START AND END 
+
+func place_start_and_end() -> void:
+	start_tile = start_end.instantiate()
+	add_child(start_tile)
+	start_tile.pipe_type = start_tile.PipeType.START
+	start_tile.grid_pos = start_pos
+	start_tile.position = Vector2(
+		start_pos.x * CELL_SIZE,
+		start_pos.y * CELL_SIZE
+	)
+	start_tile.update_sprite()
+	var start_direction: Vector2i = solution_path[1] - start_pos
+	start_tile.set_direction(start_direction)	
+	
+	end_tile = start_end.instantiate()
+	add_child(end_tile)
+	end_tile.pipe_type = end_tile.PipeType.END1
+	end_tile.grid_pos = end_pos
+	end_tile.position = Vector2(
+		end_pos.x * CELL_SIZE,
+		end_pos.y * CELL_SIZE
+	)
+	end_tile.update_sprite()	
+	var before_end: Vector2i = solution_path[solution_path.size() - 2]
+	var end_direction: Vector2i = before_end - end_pos
+
+	end_tile.set_direction(end_direction)
+
 	
 #WATERFLOW
 
