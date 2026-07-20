@@ -12,6 +12,7 @@ enum PipeType {
 @onready var sprite: Sprite2D = $Sprite2D
 
 var grid_pos: Vector2i
+var rotation_step := 0
 
 const CELL_SIZE = 32
 
@@ -42,5 +43,54 @@ func update_sprite() -> void:
 			
 
 func rotate_pipe() -> void:
+	rotation_step = (rotation_step + 1) % 4
 	sprite.rotation_degrees += 90
 	
+func get_connections() -> Array[Vector2i]:
+	var connections: Array[Vector2i] = []
+
+	match pipe_type:
+		PipeType.STRAIGHT:
+			connections = [
+				Vector2i.LEFT,
+				Vector2i.RIGHT
+			]
+
+		PipeType.CORNER:
+			connections = [
+				Vector2i.RIGHT,
+				Vector2i.DOWN
+			]
+
+		PipeType.TEE:
+			connections = [
+				Vector2i.LEFT,
+				Vector2i.RIGHT,
+				Vector2i.DOWN
+			]
+
+		PipeType.CROSS:
+			connections = [
+				Vector2i.LEFT,
+				Vector2i.RIGHT,
+				Vector2i.UP,
+				Vector2i.DOWN
+			]
+
+	return rotate_connections(connections)
+	
+func rotate_connections(connections: Array[Vector2i]) -> Array[Vector2i]:
+	var rotated: Array[Vector2i] = []
+
+	for connection in connections:
+		var new_direction := connection
+
+		for i in range(rotation_step):
+			new_direction = Vector2i(
+				-new_direction.y,
+				new_direction.x
+			)
+
+		rotated.append(new_direction)
+
+	return rotated
