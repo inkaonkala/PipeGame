@@ -248,7 +248,29 @@ func place_pipe(type_name: String, grid_pos: Vector2i) -> void:
 	update_pipe_ui()
 #	print("Placed ", type_name, " at ", grid_pos)
 #	print("Remaining pipes: ", pipe_inventory)
-		
+	
+func try_remove_pipe(grid_pos: Vector2i) -> void:
+	if not placed_pipes.has(grid_pos):
+		return
+	var pipe = placed_pipes[grid_pos]
+	
+	match pipe.pipe_type:
+		pipe.PipeType.STRAIGHT:
+			pipe_inventory["straight"] += 1
+
+		pipe.PipeType.CORNER:
+			pipe_inventory["corner"] += 1
+
+		pipe.PipeType.TEE:
+			pipe_inventory["tee"] += 1
+
+		pipe.PipeType.CROSS:
+			pipe_inventory["cross"] += 1
+
+	placed_pipes.erase(grid_pos)
+	pipe.queue_free()
+	update_pipe_ui()
+	
 #WE DONT NEED THIS ANYMORE!
 func spawn_test_pipe() -> void:
 	var pipe = pipe_tiles.instantiate()
@@ -270,16 +292,18 @@ func place_enemies() -> void:
 	
 #INPUT!
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			var local_mouse := to_local(event.position)
+	if event is InputEventMouseButton and event.pressed:
+		var local_mouse := to_local(event.position)
 
-			var grid_pos := Vector2i(
-				int(local_mouse.x / CELL_SIZE),
-				int(local_mouse.y / CELL_SIZE)
-			)
+		var grid_pos := Vector2i(
+			int(local_mouse.x / CELL_SIZE),
+			int(local_mouse.y / CELL_SIZE)
+		)
 
+		if event.button_index == MOUSE_BUTTON_LEFT:
 			try_place_pipe(grid_pos)
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			try_remove_pipe(grid_pos)
 
 
 func _on_straight_pressed() -> void:
