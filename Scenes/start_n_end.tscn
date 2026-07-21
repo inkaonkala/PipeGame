@@ -14,4 +14,3 @@ end2_texture = ExtResource("4_75axg")
 end3_texture = ExtResource("5_wecid")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-offset = Vector2(16, 16)

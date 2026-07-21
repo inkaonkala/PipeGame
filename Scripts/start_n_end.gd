@@ -21,6 +21,10 @@ var rotation_step := 0
 
 const CELL_SIZE = 32
 
+func _ready() -> void:
+	sprite.position = Vector2(CELL_SIZE / 2.0, CELL_SIZE / 2.0)
+	
+
 func get_connections() -> Array[Vector2i]:
 	var connections: Array[Vector2i] = []
 
