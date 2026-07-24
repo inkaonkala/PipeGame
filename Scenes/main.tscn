@@ -51,6 +51,14 @@ icon = ExtResource("6_ynf5e")
 layout_mode = 2
 icon = ExtResource("7_hptm8")
 
+[node name="BuildTimer" type="Timer" parent="CanvasLayer"]
+wait_time = 30.0
+one_shot = true
+
+[node name="TimeLabel" type="Label" parent="CanvasLayer"]
+offset_right = 40.0
+offset_bottom = 23.0
+
 [connection signal="pressed" from="CanvasLayer/HBoxContainer/Straight" to="Board" method="_on_straight_pressed"]
 [connection signal="pressed" from="CanvasLayer/HBoxContainer/Corner" to="Board" method="_on_corner_pressed"]
 [connection signal="pressed" from="CanvasLayer/HBoxContainer/Tee" to="Board" method="_on_tee_pressed"]

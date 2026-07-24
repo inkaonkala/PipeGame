@@ -89,6 +89,7 @@ func set_direction(direction: Vector2i) -> void:
 		step = (step + 2) % 4
 
 	set_rotation_step(step)
+	
 func update_sprite() -> void:
 	match pipe_type:
 		PipeType.START:

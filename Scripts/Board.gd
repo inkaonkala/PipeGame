@@ -11,6 +11,9 @@ const CELL_SIZE := 32
 @onready var corner_button = $"../CanvasLayer/HBoxContainer/Corner"
 @onready var tee_button = $"../CanvasLayer/HBoxContainer/Tee"
 @onready var cross_button = $"../CanvasLayer/HBoxContainer/Cross"
+@onready var build_timer: Timer = $"../CanvasLayer/BuildTimer"
+@onready var time_label: Label = $"../CanvasLayer/TimeLabel"
+
 
 var start_pos: Vector2i
 var end_pos: Vector2i
@@ -30,7 +33,11 @@ var pipe_inventory := {
 	"cross": 0
 }
 
+var can_edit := true
+
 func _ready() -> void:
+	
+	
 	generate_start_and_end()
 	gene_solutionpath()
 	gene_obs(8)
@@ -40,11 +47,19 @@ func _ready() -> void:
 	check_what_pipe()
 	add_extra_pipes()
 	
+	build_timer.timeout.connect(start_water_phase)
+	build_timer.start()
+	
 	update_pipe_ui()
 	#print("Player pipes: ", pipe_inventory)
 	queue_redraw()
 	
+	
 #	spawn_test_pipe()
+
+func _process(_delta: float) -> void:
+	if can_edit:
+		time_label.text = str(ceil(build_timer.time_left))
 
 func generate_start_and_end() -> void:
 	start_pos = Vector2i(
@@ -358,6 +373,18 @@ func place_enemies() -> void:
 		enemy.setup_enemies(obsta_pos)
 	
 	
+#TIMER!
+func start_water_phase() -> void:
+	can_edit = false
+	time_label.text = "WATER!"
+
+	var success := check_water_path()
+
+	if success:
+		print("SUCCESS!")
+	else:
+		print("FLOOD!")	
+
 #INPUT!
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
