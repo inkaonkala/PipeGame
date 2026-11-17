@@ -11,8 +11,22 @@
 
 [node name="Main" type="Node2D"]
 
+[node name="CanvasLayer2" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer2"]
+z_index = -10
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0069119367, 0.42592338, 0.3746852, 1)
+
 [node name="Board" type="Node2D" parent="."]
-position = Vector2(405, 5)
+z_index = 2
+position = Vector2(294, 13)
 scale = Vector2(2, 2)
 script = ExtResource("1_jjgbg")
 pipe_tiles = ExtResource("2_bo1nx")
@@ -20,6 +34,7 @@ enemy_scene = ExtResource("3_8gbba")
 start_end = ExtResource("4_344ge")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer"]
 anchors_preset = 7
@@ -27,9 +42,9 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -22.0
+offset_left = -237.0
 offset_top = -40.0
-offset_right = 22.0
+offset_right = -65.0
 grow_horizontal = 2
 grow_vertical = 0
 scale = Vector2(2, 2)
@@ -52,7 +67,7 @@ layout_mode = 2
 icon = ExtResource("7_hptm8")
 
 [node name="BuildTimer" type="Timer" parent="CanvasLayer"]
-wait_time = 30.0
+wait_time = 15.0
 one_shot = true
 
 [node name="TimeLabel" type="Label" parent="CanvasLayer"]

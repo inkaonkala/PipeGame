@@ -189,33 +189,17 @@ func _draw() -> void:
 				
 			)
 	#DRAW SOLUTION
-	for cell in solution_path:
-		var cell_pos := Vector2(
-			cell.x * CELL_SIZE,
-			cell.y * CELL_SIZE
-		)
+	#for cell in solution_path:
+	#	var cell_pos := Vector2(
+	#		cell.x * CELL_SIZE,
+	#		cell.y * CELL_SIZE
+	#	)
 		
-		draw_rect(
-			Rect2(cell_pos, Vector2(CELL_SIZE, CELL_SIZE)),
-			Color(0.348, 0.746, 0.739, 1.0),
-			true
-		)
-	#DRAW OBSTACLES
-#	@warning_ignore("shadowed_variable")
-#	for obsta in obsta:
-#		var obs_pos := Vector2(
-#			obsta.x * CELL_SIZE,
-#			obsta.y * CELL_SIZE
-#		)
-#		
-#		draw_rect(
-#			Rect2(
-#				obs_pos,
-#				Vector2(CELL_SIZE, CELL_SIZE)
-#			),
-#			Color.DARK_GREEN,
-#			true
-#			)
+	#	draw_rect(
+	#		Rect2(cell_pos, Vector2(CELL_SIZE, CELL_SIZE)),
+	#		Color(0.348, 0.746, 0.739, 1.0),
+	#		true
+	#	)
 
 func try_place_pipe(grid_pos: Vector2i) -> void:
 	print("CLICK: ", grid_pos)
@@ -409,6 +393,8 @@ func start_water_phase() -> void:
 
 	var success := check_water_path()
 
+	await animate_water()
+	
 	if success:
 		print("SUCCESS!")
 	else:

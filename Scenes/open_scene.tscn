@@ -6,23 +6,34 @@
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_d1mrb")
 
-[node name="PipeAlku" type="Sprite2D" parent="."]
-position = Vector2(756, 513)
+[node name="TextureRect" type="TextureRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 2.0
+offset_right = 1139.0
+offset_bottom = 644.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("1_xtx2w")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="start" type="Button" parent="."]
-offset_left = 668.0
-offset_top = 591.0
-offset_right = 1228.0
-offset_bottom = 759.0
+[node name="start" type="Button" parent="TextureRect"]
+layout_mode = 0
+offset_left = 524.0
+offset_top = 383.0
+offset_right = 851.0
+offset_bottom = 461.0
 flat = true
 
-[node name="cancel" type="Button" parent="."]
-offset_left = 677.0
-offset_top = 783.0
-offset_right = 1210.0
-offset_bottom = 924.0
+[node name="cancel" type="Button" parent="TextureRect"]
+layout_mode = 0
+offset_left = 523.0
+offset_top = 498.0
+offset_right = 850.0
+offset_bottom = 577.0
 flat = true
 
-[connection signal="pressed" from="start" to="." method="_on_start_pressed"]
-[connection signal="pressed" from="cancel" to="." method="_on_cancel_pressed"]
+[connection signal="pressed" from="TextureRect/start" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="TextureRect/cancel" to="." method="_on_cancel_pressed"]
