@@ -31,18 +31,18 @@ func get_connections() -> Array[Vector2i]:
 	match pipe_type:
 		PipeType.START:
 			connections = [
-				Vector2i.LEFT
+				Vector2i.RIGHT
 			]
 
 		PipeType.END1:
 			connections = [
-				Vector2i.RIGHT
+				Vector2i.LEFT
 			]
 
 		PipeType.END2:
 			connections = [
 				Vector2i.UP,
-				Vector2i.RIGHT
+				Vector2i.LEFT
 			]
 
 		PipeType.END3:

@@ -220,7 +220,14 @@ func try_place_pipe(grid_pos: Vector2i) -> void:
 		return
 	if grid_pos in obsta:
 		return
-	if grid_pos == start_pos or grid_pos == end_pos:
+#	if grid_pos == start_pos or grid_pos == end_pos:
+#		return
+	if grid_pos == start_pos:
+		start_tile.set_rotation_step((start_tile.rotation_step + 1) % 4)
+		return
+
+	if grid_pos == end_pos:
+		end_tile.set_rotation_step((end_tile.rotation_step + 1) % 4)
 		return
 	if placed_pipes.has(grid_pos):
 		var pipe = placed_pipes[grid_pos]
@@ -304,8 +311,13 @@ func place_start_and_end() -> void:
 		start_pos.y * CELL_SIZE
 	)
 	start_tile.update_sprite()
-	var start_direction: Vector2i = solution_path[1] - start_pos
-	start_tile.set_direction(start_direction)	
+	#var start_direction: Vector2i = solution_path[1] - start_pos
+	#start_tile.set_direction(start_direction)	
+	#DEBUG
+	#print("START desired dir: ", start_direction)
+	#print("START rotation step: ", start_tile.rotation_step)
+	#print("START actual connections: ", start_tile.get_connections())
+	
 	
 	end_tile = start_end.instantiate()
 	add_child(end_tile)
@@ -316,15 +328,19 @@ func place_start_and_end() -> void:
 		end_pos.y * CELL_SIZE
 	)
 	end_tile.update_sprite()	
-	var before_end: Vector2i = solution_path[solution_path.size() - 2]
-	var end_direction: Vector2i = before_end - end_pos
+	#var before_end: Vector2i = solution_path[solution_path.size() - 2]
+	#var end_direction: Vector2i = before_end - end_pos
 
-	end_tile.set_direction(end_direction)
+	#end_tile.set_direction(end_direction)
 
 	
 #WATERFLOW
 
 func check_water_path() -> bool:
+	
+	print("START connections: ", start_tile.get_connections())
+	print("END connections: ", end_tile.get_connections())
+
 	var visited: Array[Vector2i] = []
 	var to_check: Array[Vector2i] = [start_pos]
 
@@ -348,22 +364,27 @@ func check_water_path() -> bool:
 				
 func get_cell_directions(grid_pos: Vector2i) -> Array[Vector2i]:
 	if grid_pos == start_pos:
-		return[Vector2i.RIGHT]
+		return start_tile.get_connections()
+
+	if grid_pos == end_pos:
+		return end_tile.get_connections()
+
 	if placed_pipes.has(grid_pos):
 		return placed_pipes[grid_pos].get_connections()
-	
-	return[]
+
+	return []
 		
 func can_flow(current_pos: Vector2i, next_pos: Vector2i, dir: Vector2i) -> bool:
 	if next_pos == end_pos:
-		return true
+		return -dir in end_tile.get_connections()
+		
 	if not placed_pipes.has(next_pos):
 		return false
 	
 	var next_pipe = placed_pipes[next_pos]
-	var opposite_dir := -dir
+	#var opposite_dir := -dir
 	
-	return opposite_dir in next_pipe.get_connections()
+	return -dir in next_pipe.get_connections()
 
 #ENEMIES
 func place_enemies() -> void:
@@ -387,6 +408,8 @@ func start_water_phase() -> void:
 
 #INPUT!
 func _unhandled_input(event: InputEvent) -> void:
+	if not can_edit:
+		return 
 	if event is InputEventMouseButton and event.pressed:
 		var local_mouse := to_local(event.position)
 
