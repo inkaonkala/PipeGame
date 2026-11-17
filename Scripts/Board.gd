@@ -18,7 +18,10 @@ const CELL_SIZE := 32
 var start_pos: Vector2i
 var end_pos: Vector2i
 var obsta: Array[Vector2i] = []
+
 var solution_path: Array[Vector2i] = []
+var water_path: Array[Vector2i] = []
+
 
 var start_tile
 var end_tile
@@ -338,9 +341,10 @@ func place_start_and_end() -> void:
 
 func check_water_path() -> bool:
 	
-	print("START connections: ", start_tile.get_connections())
-	print("END connections: ", end_tile.get_connections())
-
+#	print("START connections: ", start_tile.get_connections())
+#	print("END connections: ", end_tile.get_connections())
+	water_path.clear()
+	
 	var visited: Array[Vector2i] = []
 	var to_check: Array[Vector2i] = [start_pos]
 
@@ -349,7 +353,10 @@ func check_water_path() -> bool:
 		
 		if current in visited:
 			continue
+			
 		visited.append(current)
+		water_path.append(current)
+		
 		if current == end_pos:
 			print("Water reached the end!")
 			return true
@@ -359,6 +366,7 @@ func check_water_path() -> bool:
 			
 			if can_flow(current, next_pos, dir):
 				to_check.append(next_pos)
+				
 	print("WATER IS LEAKING!!")
 	return false
 				
@@ -405,6 +413,24 @@ func start_water_phase() -> void:
 		print("SUCCESS!")
 	else:
 		print("FLOOD!")	
+		
+func animate_water() -> void:
+	for grid_pos in water_path:
+		var tile: Node2D = null
+		
+		if grid_pos == start_pos:
+			tile = start_tile
+		elif  grid_pos == end_pos:
+			tile = end_tile
+		elif placed_pipes.has(grid_pos):
+			tile = placed_pipes[grid_pos]
+		
+		if tile != null:
+			var letsgo := create_tween()
+			letsgo.tween_property(tile, "modulate", Color(0.3, 0.8, 1.0), 0.2)
+			await letsgo.finished
+		
+		await get_tree().create_timer(0.15).timeout
 
 #INPUT!
 func _unhandled_input(event: InputEvent) -> void:
@@ -440,4 +466,11 @@ func _on_cross_pressed() -> void:
 #TEMP TEST!!
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
-		check_water_path()
+		var success := check_water_path()
+		await animate_water()
+		
+		if success:
+			print("WON")
+		else:
+			print("FLOOD")
+		#check_water_path()
