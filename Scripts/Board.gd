@@ -442,6 +442,8 @@ func flow_water() -> void:
 func end_game(success: bool) -> void:
 	water_running = false
 	can_edit = false
+	
+	GameResult.success = success
 
 	if success:
 		time_label.text = "SUCCESS!"
@@ -509,13 +511,12 @@ func _on_cross_pressed() -> void:
 
 
 #TEMP TEST!!
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept"):
-		var success := check_water_path()
-		await animate_water()
-		
-		if success:
-			print("WON")
-		else:
-			print("FLOOD")
+#func _input(event: InputEvent) -> void:
+#	if event.is_action_pressed("ui_accept"):
+#		var success := check_water_path()
+#		await animate_water()		
+#		if success:
+#			print("WON")
+#		else:
+#			print("FLOOD")
 		#check_water_path()

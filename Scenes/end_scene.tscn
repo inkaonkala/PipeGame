@@ -1,10 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://cgu30fmarurpm"]
+[gd_scene load_steps=5 format=3 uid="uid://cgu30fmarurpm"]
 
 [ext_resource type="Script" uid="uid://dibwv7npxeo2r" path="res://Scripts/end_scene.gd" id="1_5pkqa"]
 [ext_resource type="Texture2D" uid="uid://bcj4xii624qbw" path="res://Assets/cross.png" id="2_5rked"]
+[ext_resource type="Texture2D" uid="uid://w7008mfqp04i" path="res://Assets/happyfish.png" id="2_8jdvl"]
+[ext_resource type="Texture2D" uid="uid://bcau1mynbj0xa" path="res://Assets/deadfish.png" id="3_8p78e"]
 
 [node name="EndScene" type="Node2D"]
 script = ExtResource("1_5pkqa")
+succes_txt = ExtResource("2_8jdvl")
+fail_txt = ExtResource("3_8p78e")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -29,7 +33,7 @@ offset_right = 20.0
 offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(2, 2)
+scale = Vector2(3, 3)
 icon = ExtResource("2_5rked")
 
 [connection signal="pressed" from="CanvasLayer/Button" to="." method="_on_button_pressed"]
