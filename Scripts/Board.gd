@@ -21,7 +21,8 @@ var obsta: Array[Vector2i] = []
 
 var solution_path: Array[Vector2i] = []
 var water_path: Array[Vector2i] = []
-
+var water_running := false
+var tiles_watered: Array[Vector2i] = []
 
 var start_tile
 var end_tile
@@ -39,8 +40,6 @@ var pipe_inventory := {
 var can_edit := true
 
 func _ready() -> void:
-	
-	
 	generate_start_and_end()
 	gene_solutionpath()
 	gene_obs(8)
@@ -54,14 +53,11 @@ func _ready() -> void:
 	build_timer.start()
 	
 	update_pipe_ui()
-	#print("Player pipes: ", pipe_inventory)
 	queue_redraw()
 	
-	
-#	spawn_test_pipe()
 
 func _process(_delta: float) -> void:
-	if can_edit:
+	if can_edit and not water_running:
 		time_label.text = str(ceil(build_timer.time_left))
 
 func generate_start_and_end() -> void:
@@ -202,7 +198,9 @@ func _draw() -> void:
 	#	)
 
 func try_place_pipe(grid_pos: Vector2i) -> void:
-	print("CLICK: ", grid_pos)
+	#print("CLICK: ", grid_pos)
+	if grid_pos in tiles_watered:
+		return
 	if not is_inside_grid(grid_pos):
 		return
 	if grid_pos in obsta:
@@ -265,6 +263,8 @@ func place_pipe(type_name: String, grid_pos: Vector2i) -> void:
 #	print("Remaining pipes: ", pipe_inventory)
 	
 func try_remove_pipe(grid_pos: Vector2i) -> void:
+	if grid_pos in tiles_watered:
+		return
 	if not placed_pipes.has(grid_pos):
 		return
 	var pipe = placed_pipes[grid_pos]
@@ -374,7 +374,6 @@ func can_flow(current_pos: Vector2i, next_pos: Vector2i, dir: Vector2i) -> bool:
 		return false
 	
 	var next_pipe = placed_pipes[next_pos]
-	#var opposite_dir := -dir
 	
 	return -dir in next_pipe.get_connections()
 
@@ -386,22 +385,79 @@ func place_enemies() -> void:
 		enemy.setup_enemies(obsta_pos)
 	
 	
-#TIMER!
-func start_water_phase() -> void:
-	can_edit = false
-	time_label.text = "WATER!"
-
-	var success := check_water_path()
-
-	await animate_water()
+#WATERMOVES!!
+func flow_water() -> void:
+	var frontwa: Array[Vector2i] = [start_pos]
+	var visited_tiles: Array[Vector2i] = []
 	
+	while not frontwa.is_empty():
+		var next_fw: Array[Vector2i] = []
+		
+		for current in frontwa:
+			if current in visited_tiles:
+				continue
+			
+			visited_tiles.append(current)
+			tiles_watered.append(current)
+			
+			var tile: Node2D = null
+			
+			if current == start_pos:
+				tile = start_tile
+			elif current == end_pos:
+				tile = end_tile
+			elif placed_pipes.has(current):
+				tile = placed_pipes[current]
+			
+			if tile == null:
+				end_game(false)
+				return
+				
+			var tween := create_tween()
+			tween.tween_property(tile, "modulate", Color(0.3, 0.8, 1.0), 0.4)
+			await tween.finished
+		
+			if current == end_pos:
+				end_game(true)
+				return
+			for dir in get_cell_directions(current):
+				var next_pos := current + dir
+				if next_pos in visited_tiles:
+					continue
+				
+				if not is_inside_grid(next_pos):
+					end_game(false)
+					return
+				if not can_flow(current, next_pos, dir):
+					end_game(false)
+					return
+				if next_pos not in visited_tiles:
+					next_fw.append(next_pos)
+		frontwa = next_fw
+		await get_tree().create_timer(0.35).timeout
+	end_game(false)
+
+#ENDGAME!
+
+func end_game(success: bool) -> void:
+	water_running = false
+	can_edit = false
+
 	if success:
-		print("SUCCESS!")
+		time_label.text = "SUCCESS!"
+		print("WON!")
 	else:
-		print("FLOOD!")	
-	await(2.0)
+		time_label.text = "FLOOD!"
+		print("GAME OVER!")
+	
+	await get_tree().create_timer(2.5).timeout
 	get_tree().change_scene_to_file("res://Scenes/end_scene.tscn")
 	
+	
+func start_water_phase() -> void:
+	water_running = true
+	time_label.text = "WATER!"
+	await flow_water()
 		
 func animate_water() -> void:
 	for grid_pos in water_path:
