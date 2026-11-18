@@ -67,7 +67,7 @@ layout_mode = 2
 icon = ExtResource("7_hptm8")
 
 [node name="BuildTimer" type="Timer" parent="CanvasLayer"]
-wait_time = 15.0
+wait_time = 9.0
 one_shot = true
 
 [node name="TimeLabel" type="Label" parent="CanvasLayer"]
