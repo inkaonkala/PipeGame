@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bw17vd6h2gnvw"]
 
-[ext_resource type="Script" uid="uid://inqys15hi1ld" path="res://Scenes/open_scene.gd" id="1_d1mrb"]
+[ext_resource type="Script" uid="uid://inqys15hi1ld" path="res://open_scene.gd" id="1_d1mrb"]
 [ext_resource type="Texture2D" uid="uid://ccrr21ka2vrv8" path="res://Assets/pipe_alku.png" id="1_xtx2w"]
 
 [node name="Node2D" type="Node2D"]

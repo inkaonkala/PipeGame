@@ -399,6 +399,9 @@ func start_water_phase() -> void:
 		print("SUCCESS!")
 	else:
 		print("FLOOD!")	
+	await(2.0)
+	get_tree().change_scene_to_file("res://Scenes/end_scene.tscn")
+	
 		
 func animate_water() -> void:
 	for grid_pos in water_path:

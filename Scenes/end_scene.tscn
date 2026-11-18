@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgu30fmarurpm"]
+
+[ext_resource type="Script" uid="uid://dibwv7npxeo2r" path="res://Scripts/end_scene.gd" id="1_5pkqa"]
+[ext_resource type="Texture2D" uid="uid://bcj4xii624qbw" path="res://Assets/cross.png" id="2_5rked"]
+
+[node name="EndScene" type="Node2D"]
+script = ExtResource("1_5pkqa")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.6528526, 0.97341794, 0.94900936, 1)
+
+[node name="Button" type="Button" parent="CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(2, 2)
+icon = ExtResource("2_5rked")
+
+[connection signal="pressed" from="CanvasLayer/Button" to="." method="_on_button_pressed"]
